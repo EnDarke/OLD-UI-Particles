@@ -64,8 +64,8 @@ local function setDirection(speed: number, emitDirection: string?, spread: table
 	speed *= 0.01 -- This is so you can input values of 1+ for easier to understand time.
 
 	local function createScatterDirection(min: number, max: number) -- Calculates from min and max degree inputs and finds the vector on the unit circle multiplied by speed input.
-		local RandomDegree = _Random(Seed+3):NextInteger(min, max and max or min)
-		local RandomSpread = _Random(Seed+4):NextInteger(spread[1], spread[2])
+		local RandomDegree = _Random(Seed+3*2):NextInteger(min, max and max or min) -- Using math with the seed to make it unique.
+		local RandomSpread = _Random(Seed+4*2):NextInteger(spread[1], spread[2]) -- Using math with the seed to make it unique.
 
 		Seed += 1 -- Necessary for Random to have a new seed.
 		return _UDim2(_cos(_rad(-RandomDegree + RandomSpread)) * speed, _sin(_rad(-RandomDegree + RandomSpread)) * speed) -- Yep... Math... :(
@@ -159,8 +159,8 @@ function UIParticles:Emit(count: number, FadeOut: boolean, SizeChange: boolean, 
 		local Speed = self.Speed
 		Speed = _Random(Seed):NextNumber(Speed[1], Speed[2])
 
-		local RotationSpeed = _Random(Seed+1):NextNumber(self.RotationSpeed[1], self.RotationSpeed[2])
-		Particle.Rotation = _Random(Seed+2):NextNumber(self.Rotation[1], self.Rotation[2])
+		local RotationSpeed = _Random(Seed+1):NextNumber(self.RotationSpeed[1], self.RotationSpeed[2]) -- Using math with the seed to make it unique.
+		Particle.Rotation = _Random(Seed+2):NextNumber(self.Rotation[1], self.Rotation[2]) -- Using math with the seed to make it unique.
 
 		local Velocity = self.Velocity -- Sets to base velocity given.
 		Velocity = self.Direction and setDirection(Speed, self.Direction, self.SpreadAngle) -- Only emits towards a direction if direction is set.
