@@ -4,6 +4,9 @@
 	- Creates and runs a 2D particle based off given input.
 	- You can emit in preset directions OR you can input your own value (IN DEGREES!)
 	- Emit multiple at once, OR Emit as many as you can over time!
+	- Defaulted to using scale for size and position. Size can be changed to offset if wanting.
+	- It is NOT necessary to input ALL of the particle information shown, there are defaults set.
+	- Will change to an image label IF an image is inputed.
 
 	PRESET DIRECTIONS (In Strings):
 		- Top
@@ -29,7 +32,6 @@ local Client = Players.LocalPlayer
 
 local Seed = 1
 
-local _pi = math.pi
 local _cos = math.cos
 local _sin = math.sin
 local _rad = math.rad
@@ -62,14 +64,14 @@ local function setDirection(speed: number, emitDirection: string?, spread: table
 	speed *= 0.01 -- This is so you can input values of 1+ for easier to understand time.
 
 	local function createScatterDirection(min: number, max: number) -- Calculates from min and max degree inputs and finds the vector on the unit circle multiplied by speed input.
-		Seed += 1 -- Necessary for Random to have a new seed.
+		local RandomDegree = _Random(Seed+3):NextInteger(min, max and max or min)
+		local RandomSpread = _Random(Seed+4):NextInteger(spread[1], spread[2])
 
-		local RandomDegree = _Random(Seed):NextInteger(min, max and max or min)
-		local RandomSpread = _Random(Seed):NextInteger(spread.Min, spread.Max)
-		
-		return _UDim2(_cos(_rad(-RandomDegree + RandomSpread)) * speed, _sin(_rad(-RandomDegree + RandomSpread)) * speed)
+		Seed += 1 -- Necessary for Random to have a new seed.
+		return _UDim2(_cos(_rad(-RandomDegree + RandomSpread)) * speed, _sin(_rad(-RandomDegree + RandomSpread)) * speed) -- Yep... Math... :(
 	end
 
+	-- Allows for 1 number input to get the set direction in a line.
 	return (type(emitDirection) == "number" and createScatterDirection(emitDirection)) -- Checks if you inputted a degree.
 		or (emitDirection == "Top" and createScatterDirection(90)) -- Checks if you inputted Top.
 		or (emitDirection == "Bottom" and createScatterDirection(270)) -- Checks if you inputted Bottom.
@@ -80,6 +82,18 @@ local function setDirection(speed: number, emitDirection: string?, spread: table
 		or (emitDirection == "BottomLeft" and createScatterDirection(225)) -- Checks if you inputted BottomLeft.
 		or (emitDirection == "BottomRight" and createScatterDirection(315)) -- Checks if you inputted BottomRight.
 		or (emitDirection == "Scatter" and createScatterDirection(0, 360)) -- Checks if you inputted Scatter.
+end
+
+local function Fade(self, Particle, Lifetime)
+	local tweenInfo = _TweenInfo(Lifetime, self.TweenStyle, self.TweenDirection, self.RepeatCount, self.Reverses, self.DelayTime)
+	local Tween = TweenService:Create(Particle, tweenInfo, self.ClearTweenProperties)
+	Tween:Play()
+end
+
+local function SizeTween(self, Particle, Lifetime)
+	local tweenInfo = _TweenInfo(Lifetime, self.TweenStyle, self.TweenDirection, self.RepeatCount, self.Reverses, self.DelayTime)
+	local Tween = TweenService:Create(Particle, tweenInfo, self.SizeTweenProperties)
+	Tween:Play()
 end
 
 -- Module Code
@@ -94,18 +108,20 @@ function UIParticles.new(particleInfo: table): table -- Creates a new set of par
 	self.AnchorPoint			= particleInfo.AnchorPoint and particleInfo.AnchorPoint or _Vector2(0, 0) -- Where do you want to anchor the particle?
 	self.BackgroundTransparency = particleInfo.BackgroundTransparency and particleInfo.BackgroundTransparency or 0 -- How transparent are the particles?
 	self.Position				= particleInfo.StartPosition and particleInfo.StartPosition or _UDim2(0, 0) -- Where do you want it to start?
-	self.Rotation				= particleInfo.Rotation and particleInfo.Rotation or 0 -- What rotation do you want it to start in?
+	self.Rotation				= particleInfo.Rotation and particleInfo.Rotation or {0, 0} -- What rotation do you want it to start in?
 	self.Size					= particleInfo.Size and particleInfo.Size or _UDim2(0.1, 0.1) -- How big do you want it? (In UDim2.fromScale)
 	self.ZIndex					= particleInfo.ZIndex and particleInfo.ZIndex or 1 -- At what depth do you want these to play?
 	self.Image					= particleInfo.Image and particleInfo.Image or "rbxassetid://1" -- String ("rbxassetid://") Input.
-	self.ImageColor3			= particleInfo.Color and particleInfo.Color or _Color3(255, 255, 255) -- Input what color you want in RGB.
+	self.ImageColor3			= particleInfo.ImageColor3 and particleInfo.ImageColor3 or _Color3(255, 255, 255) -- Input what color you want in RGB.
 	self.BackgroundColor3		= particleInfo.BackgroundColor3 and particleInfo.BackgroundColor3 or _Color3(255, 255, 255) -- Input what color you want in RGB.
 
 	-- Physics Properties
-	self.SpreadAngle			= particleInfo.SpreadAngle and particleInfo.SpreadAngle or {Min = 0, Max = 0} -- Input a table with min and max values (deg).
-	self.Lifetime				= particleInfo.Lifetime and particleInfo.Lifetime or {Min = 1, Max = 1} -- Input a table with min and max values (s).
+	self.Lifetime				= particleInfo.Lifetime and particleInfo.Lifetime or {1, 1} -- Input a table with min and max values (s).
+	self.Velocity				= particleInfo.Velocity and particleInfo.Velocity or _UDim2(0, 0)
+	self.SpreadAngle			= particleInfo.SpreadAngle and particleInfo.SpreadAngle or {0, 0} -- Input a table with min and max values (deg).
 	self.Direction				= particleInfo.Direction and particleInfo.Direction or "Top" -- String or Number | See Description for more info.
-	self.Speed					= particleInfo.Speed and particleInfo.Speed or 1 -- How fast do you want it to move over time?
+	self.RotationSpeed			= particleInfo.RotationSpeed and particleInfo.RotationSpeed or 0 -- Number of how fast you want it to rotate overtime
+	self.Speed					= particleInfo.Speed and particleInfo.Speed or {1, 2} -- How fast do you want it to move over time?
 	self.Acceleration			= particleInfo.Acceleration and particleInfo.Acceleration or _UDim2(0, 0) -- Takes in X and Y (Numbers should be SUPER low cause it works on scale).
 
 	-- Tween Properties
@@ -123,13 +139,13 @@ function UIParticles.new(particleInfo: table): table -- Creates a new set of par
 	return self
 end
 
-function UIParticles:Emit(count: number, FadeOut: boolean, SizeChange: boolean) -- Emits particles based on preset amount and lets you fade out or change size!
-	local HeartbeatInstances = {}
+function UIParticles:Emit(count: number, FadeOut: boolean, SizeChange: boolean, timeBased: boolean, rate: number) -- Emits particles based on preset amount and lets you fade out or change size!
+	local HeartbeatInstances = {} -- To store ALL particle events >:)
 
 	-- Gather all of the UI objects
-	for i = count, 1, -1 do
+	for i = count, 1, timeBased and -(rate/60) or -1 do
 		-- Particle Setup
-		local Lifetime = _Random(Seed):NextNumber(self.Lifetime.Min, self.Lifetime.Max)
+		local Lifetime = _Random(Seed):NextNumber(self.Lifetime[1], self.Lifetime[2])
 		local Particle = _Instance(self.Image and "ImageLabel" or "Frame")
 
 		-- Giving the particles preset properties
@@ -139,34 +155,43 @@ function UIParticles:Emit(count: number, FadeOut: boolean, SizeChange: boolean) 
 			end
 		end
 
-		-- Speed and Direction setup
-		local Velocity = self.Velocity
-		Velocity = self.Direction and setDirection(self.Speed, self.Direction, self.SpreadAngle) -- Only emits towards a direction if direction is set.
+		-- Property setup
+		local Speed = self.Speed
+		Speed = _Random(Seed):NextNumber(Speed[1], Speed[2])
 
+		local RotationSpeed = _Random(Seed+1):NextNumber(self.RotationSpeed[1], self.RotationSpeed[2])
+		Particle.Rotation = _Random(Seed+2):NextNumber(self.Rotation[1], self.Rotation[2])
+
+		local Velocity = self.Velocity -- Sets to base velocity given.
+		Velocity = self.Direction and setDirection(Speed, self.Direction, self.SpreadAngle) -- Only emits towards a direction if direction is set.
+
+		local Acceleration = self.Acceleration
+		Acceleration = _UDim2(Acceleration.X.Scale, -Acceleration.Y.Scale) -- Just so physics make more sense ;)
+		
 		-- Play the animation!
-		HeartbeatInstances[i] = RunService.Heartbeat:Connect(function(deltaTime)
+		HeartbeatInstances[i] = RunService.Heartbeat:Connect(function(deltaTime) -- Let the movement begin!
 			if Lifetime > 0 then
-				Velocity += self.Acceleration
+				Velocity += Acceleration
+				Particle.Rotation += RotationSpeed
 				Particle.Position += Velocity
 				Lifetime -= deltaTime
 			else
-				HeartbeatInstances[i]:Disconnect()
+				HeartbeatInstances[i]:Disconnect() -- Makes sure to disconnect when no longer needed ;)
+				Particle:Destroy()
 			end
 		end)
 
 		-- Fade Out?
-		if FadeOut then
-			local tweenInfo = _TweenInfo(Lifetime, self.TweenStyle, self.TweenDirection, self.RepeatCount, self.Reverses, self.DelayTime)
-			local Tween = TweenService:Create(Particle, tweenInfo, self.ClearTweenProperties)
-			Tween:Play()
+		if FadeOut then -- ABRACADABRA IT DISAPPEARS!
+			Fade(self, Particle, Lifetime - self.DelayTime) -- Subtract delay so it still fits within the lifetime.
 		end
 
 		-- Grow?
-		if SizeChange then
-			local tweenInfo = _TweenInfo(Lifetime, self.TweenStyle, self.TweenDirection, self.RepeatCount, self.Reverses, self.DelayTime)
-			local Tween = TweenService:Create(Particle, tweenInfo, self.SizeTweenProperties)
-			Tween:Play()
+		if SizeChange then -- Drink or Cake! Which will you take!
+			SizeTween(self, Particle, Lifetime - self.DelayTime) -- Subtract delay so it still fits within the lifetime.
 		end
+
+		local waitTime = timeBased and task.wait(rate/60) -- Only waits if it's a time based emission.
 	end
 end
 
