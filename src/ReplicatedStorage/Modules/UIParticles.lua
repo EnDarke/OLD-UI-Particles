@@ -104,34 +104,34 @@ function UIParticles.new(particleInfo: table): table -- Creates a new set of par
 	assert(particleInfo, "No Particle Info")
 	local self = setmetatable({}, UIParticles)
 
-	-- Object Properties | Expanded out so it's not as cluttered to read :)
-	self.AnchorPoint			= particleInfo.AnchorPoint and particleInfo.AnchorPoint or _Vector2(0, 0) -- Where do you want to anchor the particle?
+	-- Object Properties
+	self.AnchorPoint = particleInfo.AnchorPoint and particleInfo.AnchorPoint or _Vector2(0, 0) -- Where do you want to anchor the particle?
 	self.BackgroundTransparency = particleInfo.BackgroundTransparency and particleInfo.BackgroundTransparency or 0 -- How transparent are the particles?
-	self.Position				= particleInfo.StartPosition and particleInfo.StartPosition or _UDim2(0, 0) -- Where do you want it to start?
-	self.Rotation				= particleInfo.Rotation and particleInfo.Rotation or {0, 0} -- What rotation do you want it to start in?
-	self.Size					= particleInfo.Size and particleInfo.Size or _UDim2(0.1, 0.1) -- How big do you want it? (In UDim2.fromScale)
-	self.ZIndex					= particleInfo.ZIndex and particleInfo.ZIndex or 1 -- At what depth do you want these to play?
-	self.Image					= particleInfo.Image and particleInfo.Image or "rbxassetid://1" -- String ("rbxassetid://") Input.
-	self.ImageColor3			= particleInfo.ImageColor3 and particleInfo.ImageColor3 or _Color3(255, 255, 255) -- Input what color you want in RGB.
-	self.BackgroundColor3		= particleInfo.BackgroundColor3 and particleInfo.BackgroundColor3 or _Color3(255, 255, 255) -- Input what color you want in RGB.
+	self.Position = particleInfo.StartPosition and particleInfo.StartPosition or _UDim2(0, 0) -- Where do you want it to start?
+	self.Rotation = particleInfo.Rotation and particleInfo.Rotation or {0, 0} -- What rotation do you want it to start in?
+	self.Size = particleInfo.Size and particleInfo.Size or _UDim2(0.1, 0.1) -- How big do you want it? (In UDim2.fromScale)
+	self.ZIndex = particleInfo.ZIndex and particleInfo.ZIndex or 1 -- At what depth do you want these to play?
+	self.Image = particleInfo.Image and particleInfo.Image or "rbxassetid://1" -- String ("rbxassetid://") Input.
+	self.ImageColor3 = particleInfo.ImageColor3 and particleInfo.ImageColor3 or _Color3(255, 255, 255) -- Input what color you want in RGB.
+	self.BackgroundColor3 = particleInfo.BackgroundColor3 and particleInfo.BackgroundColor3 or _Color3(255, 255, 255) -- Input what color you want in RGB.
 
 	-- Physics Properties
-	self.Lifetime				= particleInfo.Lifetime and particleInfo.Lifetime or {1, 1} -- Input a table with min and max values (s).
-	self.Velocity				= particleInfo.Velocity and particleInfo.Velocity or _UDim2(0, 0)
-	self.SpreadAngle			= particleInfo.SpreadAngle and particleInfo.SpreadAngle or {0, 0} -- Input a table with min and max values (deg).
-	self.Direction				= particleInfo.Direction and particleInfo.Direction or "Top" -- String or Number | See Description for more info.
-	self.RotationSpeed			= particleInfo.RotationSpeed and particleInfo.RotationSpeed or 0 -- Number of how fast you want it to rotate overtime
-	self.Speed					= particleInfo.Speed and particleInfo.Speed or {1, 2} -- How fast do you want it to move over time?
-	self.Acceleration			= particleInfo.Acceleration and particleInfo.Acceleration or _UDim2(0, 0) -- Takes in X and Y (Numbers should be SUPER low cause it works on scale).
+	self.Lifetime = particleInfo.Lifetime and particleInfo.Lifetime or {1, 1} -- Input a table with min and max values (s).
+	self.Velocity = particleInfo.Velocity and particleInfo.Velocity or _UDim2(0, 0) -- Do you want it to start off with traveling at a certain velocity?
+	self.SpreadAngle = particleInfo.SpreadAngle and particleInfo.SpreadAngle or {0, 0} -- Input a table with min and max values (deg).
+	self.Direction = particleInfo.Direction and particleInfo.Direction or "Top" -- String or Number | See Description for more info.
+	self.RotationSpeed = particleInfo.RotationSpeed and particleInfo.RotationSpeed or 0 -- Number of how fast you want it to rotate overtime
+	self.Speed = particleInfo.Speed and particleInfo.Speed or {1, 2} -- How fast do you want it to move over time?
+	self.Acceleration = particleInfo.Acceleration and particleInfo.Acceleration or _UDim2(0, 0) -- Takes in X and Y (Numbers should be SUPER low cause it works on scale).
 
 	-- Tween Properties
-	self.TweenStyle				= particleInfo.TweenStyle and particleInfo.TweenStyle or tweenInfo.EasingStyle -- If you want it tweened, how do you want the tween to play?
-	self.TweenDirection			= particleInfo.TweenDirection and particleInfo.TweenDirection or tweenInfo.EasingDirection -- If you want it tweened, how do you want the tween direction to go?
-	self.RepeatCount			= particleInfo.RepeatCount and particleInfo.RepeatCount or tweenInfo.RepeatCount -- If you want it tweened, do you want it to repeat?
-	self.Reverses				= particleInfo.Reverses and particleInfo.Reverses or tweenInfo.Reverses -- If you want it tweened, do you want it to reverse?
-	self.DelayTime				= particleInfo.DelayTime and particleInfo.DelayTime or tweenInfo.DelayTime -- If you want it tweened, do you want to delay it for a bit?
-	self.ClearTweenProperties	= particleInfo.Image and {ImageTransparency = 1} or {BackgroundTransparency = 1} -- These are properties for transparency tweening.
-	self.SizeTweenProperties	= particleInfo.SizeTweenProperties and particleInfo.SizeTweenProperties or {Size = _UDim2(0, 0)} -- These are properties for size tweening.
+	self.TweenStyle = particleInfo.TweenStyle and particleInfo.TweenStyle or tweenInfo.EasingStyle -- If you want it tweened, how do you want the tween to play?
+	self.TweenDirection = particleInfo.TweenDirection and particleInfo.TweenDirection or tweenInfo.EasingDirection -- If you want it tweened, how do you want the tween direction to go?
+	self.RepeatCount = particleInfo.RepeatCount and particleInfo.RepeatCount or tweenInfo.RepeatCount -- If you want it tweened, do you want it to repeat?
+	self.Reverses = particleInfo.Reverses and particleInfo.Reverses or tweenInfo.Reverses -- If you want it tweened, do you want it to reverse?
+	self.DelayTime = particleInfo.DelayTime and particleInfo.DelayTime or tweenInfo.DelayTime -- If you want it tweened, do you want to delay it for a bit?
+	self.ClearTweenProperties = particleInfo.Image and {ImageTransparency = 1} or {BackgroundTransparency = 1} -- These are properties for transparency tweening.
+	self.SizeTweenProperties = particleInfo.SizeTweenProperties and particleInfo.SizeTweenProperties or {Size = _UDim2(0, 0)} -- These are properties for size tweening.
 	-- Setting Parent
 	self.Parent					= particleInfo.Parent and particleInfo.Parent or createNewScreenGui() -- Where do you want it to go?
 
