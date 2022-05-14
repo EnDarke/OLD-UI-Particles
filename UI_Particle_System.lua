@@ -18,6 +18,14 @@
 		- BottomLeft
 		- BottomRight
 		- Scatter (All directions)
+
+	Emit Function Usage:
+		- Input: Module:Emit(count, FadeOut, SizeChange, timeBased, rate)
+		- count: How many do you want to be emitted at once? Or how long do you want it to be emitted for if timeBased is true?
+		- FadeOut: Do you want it to fade away?
+		- SizeChange: Do you want it to grow or shrink? (MUST Input Size Tween Properties)
+		- timeBased: Will replace the count with the amount of time it will run for.
+		- rate: How fast do you want to spawn these particles over time?
 ]]
 -- Author: Alex/EnDarke
 -- Date: 04/22/22
@@ -29,6 +37,8 @@ local RunService = game:GetService("RunService")
 
 -- Constants
 local Client = Players.LocalPlayer
+
+local Seed = 1
 
 local _cos = math.cos
 local _sin = math.sin
@@ -62,9 +72,10 @@ local function setDirection(speed: number, emitDirection: string?, spread: table
 	speed *= 0.01 -- This is so you can input values of 1+ for easier to understand time.
 
 	local function createScatterDirection(min: number, max: number) -- Calculates from min and max degree inputs and finds the vector on the unit circle multiplied by speed input.
-		local RandomDegree = _Random(os.clock()+3):NextInteger(min, max and max or min) -- Using math with the seed to make it unique.
-		local RandomSpread = _Random(os.clock()+4):NextInteger(spread[1], spread[2]) -- Using math with the seed to make it unique.
+		local RandomDegree = _Random(Seed+3*2):NextInteger(min, max and max or min) -- Using math with the seed to make it unique.
+		local RandomSpread = _Random(Seed+4*2):NextInteger(spread[1], spread[2]) -- Using math with the seed to make it unique.
 
+		Seed += 1 -- Necessary for Random to have a new seed.
 		return _UDim2(_cos(_rad(-RandomDegree + RandomSpread)) * speed, _sin(_rad(-RandomDegree + RandomSpread)) * speed) -- Yep... Math... :(
 	end
 
@@ -117,7 +128,7 @@ function UIParticles.new(particleInfo: table): table -- Creates a new set of par
 	self.Velocity = particleInfo.Velocity and particleInfo.Velocity or _UDim2(0, 0) -- Do you want it to start off with traveling at a certain velocity?
 	self.SpreadAngle = particleInfo.SpreadAngle and particleInfo.SpreadAngle or {0, 0} -- Input a table with min and max values (deg).
 	self.Direction = particleInfo.Direction and particleInfo.Direction or "Top" -- String or Number | See Description for more info.
-	self.RotationSpeed = particleInfo.RotationSpeed and particleInfo.RotationSpeed or 0 -- Number of how fast you want it to rotate overtime
+	self.RotationSpeed = particleInfo.RotationSpeed and particleInfo.RotationSpeed or {0, 0} -- Number of how fast you want it to rotate overtime
 	self.Speed = particleInfo.Speed and particleInfo.Speed or {1, 2} -- How fast do you want it to move over time?
 	self.Acceleration = particleInfo.Acceleration and particleInfo.Acceleration or _UDim2(0, 0) -- Takes in X and Y (Numbers should be SUPER low cause it works on scale).
 
@@ -129,9 +140,8 @@ function UIParticles.new(particleInfo: table): table -- Creates a new set of par
 	self.DelayTime = particleInfo.DelayTime and particleInfo.DelayTime or tweenInfo.DelayTime -- If you want it tweened, do you want to delay it for a bit?
 	self.ClearTweenProperties = particleInfo.Image and {ImageTransparency = 1} or {BackgroundTransparency = 1} -- These are properties for transparency tweening.
 	self.SizeTweenProperties = particleInfo.SizeTweenProperties and particleInfo.SizeTweenProperties or {Size = _UDim2(0, 0)} -- These are properties for size tweening.
-	
 	-- Setting Parent
-	self.Parent = particleInfo.Parent and particleInfo.Parent or createNewScreenGui() -- Where do you want it to go?
+	self.Parent					= particleInfo.Parent and particleInfo.Parent or createNewScreenGui() -- Where do you want it to go?
 
 	-- DON'T WORRY! I have PRESET values in place just so you don't have to input everything unnecessary!
 	return self
@@ -143,7 +153,7 @@ function UIParticles:Emit(count: number, FadeOut: boolean, SizeChange: boolean, 
 	-- Gather all of the UI objects
 	for i = count, 1, timeBased and -(rate/60) or -1 do
 		-- Particle Setup
-		local Lifetime = _Random(os.clock()):NextNumber(self.Lifetime[1], self.Lifetime[2])
+		local Lifetime = _Random(Seed):NextNumber(self.Lifetime[1], self.Lifetime[2])
 		local Particle = _Instance(self.Image and "ImageLabel" or "Frame")
 
 		-- Giving the particles preset properties
@@ -155,17 +165,17 @@ function UIParticles:Emit(count: number, FadeOut: boolean, SizeChange: boolean, 
 
 		-- Property setup
 		local Speed = self.Speed
-		Speed = _Random(os.clock()):NextNumber(Speed[1], Speed[2])
+		Speed = _Random(Seed):NextNumber(Speed[1], Speed[2])
 
-		local RotationSpeed = _Random(os.clock()+1):NextNumber(self.RotationSpeed[1], self.RotationSpeed[2]) -- Using math with the seed to make it unique.
-		Particle.Rotation = _Random(os.clock()+2):NextNumber(self.Rotation[1], self.Rotation[2]) -- Using math with the seed to make it unique.
+		local RotationSpeed = _Random(Seed+1):NextNumber(self.RotationSpeed[1], self.RotationSpeed[2]) -- Using math with the seed to make it unique.
+		Particle.Rotation = _Random(Seed+2):NextNumber(self.Rotation[1], self.Rotation[2]) -- Using math with the seed to make it unique.
 
 		local Velocity = self.Velocity -- Sets to base velocity given.
 		Velocity = self.Direction and setDirection(Speed, self.Direction, self.SpreadAngle) -- Only emits towards a direction if direction is set.
 
 		local Acceleration = self.Acceleration
 		Acceleration = _UDim2(Acceleration.X.Scale, -Acceleration.Y.Scale) -- Just so physics make more sense ;)
-		
+
 		-- Play the animation!
 		HeartbeatInstances[i] = RunService.Heartbeat:Connect(function(deltaTime) -- Let the movement begin!
 			if Lifetime > 0 then
