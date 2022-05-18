@@ -42,6 +42,7 @@ local debounce              = false
 local whitelistedElements   = {
 	-- 0 = Main Menu Buttons, 1 = Click, 2 = SET ID HERE, etc.
 	-- LAYOUT: NAME(string) = ID(number), NAME(string) = ID(number), etc.
+	MenuButton = 0,
 }
 
 -- Module Code
@@ -118,7 +119,7 @@ local function initClick(keyboard, position) -- Starts all click functions
 	local uiObj, uiType = SearchUI(uiObjects)
 	if uiType == 0 then
     OpenClose(uiObj)
-  elseif (uiType == 1 or uiType == nil) then
+  	elseif (uiType == 1 or uiType == nil) then
     clickScreen()
 	end
 end

@@ -141,7 +141,7 @@ function UIParticles.new(particleInfo: table): table -- Creates a new set of par
 	self.ClearTweenProperties = particleInfo.Image and {ImageTransparency = 1} or {BackgroundTransparency = 1} -- These are properties for transparency tweening.
 	self.SizeTweenProperties = particleInfo.SizeTweenProperties and particleInfo.SizeTweenProperties or {Size = _UDim2(0, 0)} -- These are properties for size tweening.
 	-- Setting Parent
-	self.Parent					= particleInfo.Parent and particleInfo.Parent or createNewScreenGui() -- Where do you want it to go?
+	self.Parent	= particleInfo.Parent and particleInfo.Parent or createNewScreenGui() -- Where do you want it to go?
 
 	-- DON'T WORRY! I have PRESET values in place just so you don't have to input everything unnecessary!
 	return self
